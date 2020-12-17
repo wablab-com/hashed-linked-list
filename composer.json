@@ -1,0 +1,24 @@
+{
+    "name": "wablab-com/hashed-linked-list",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Ahmad Saleh",
+            "email": "ahmadfds@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "WabLab\\HashedLinkedList\\": "src/",
+            "Tests\\": "tests/"
+        }
+    },
+
+    "description": "",
+    "require-dev": {
+        "phpunit/phpunit": "^7.5"
+    }
+}
