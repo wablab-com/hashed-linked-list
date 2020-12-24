@@ -15,24 +15,14 @@ class Node
     protected string $hash;
 
     /**
-     * @var Node[]
+     * @var NodeCollection
      */
-    protected array $left = [];
+    protected NodeCollection $left;
 
     /**
-     * @var int
+     * @var NodeCollection
      */
-    protected int $leftCount = 0;
-
-    /**
-     * @var Node[]
-     */
-    protected array $right = [];
-
-    /**
-     * @var int
-     */
-    protected int $rightCount = 0;
+    protected NodeCollection $right;
 
     /**
      * @var mixed|null
@@ -43,6 +33,8 @@ class Node
     public function __construct(string $hash, $payload) {
         $this->hash = $hash;
         $this->payload = $payload;
+        $this->left = new NodeCollection();
+        $this->right = new NodeCollection();
     }
 
     public function getHash(): string {
@@ -70,42 +62,39 @@ class Node
     // LEFT
     //
 
+    public function issetLeft(string $hash): bool {
+        return $this->left->isset($hash);
+    }
 
-    public function unsetLeft(Node $node): Node {
-        if(isset($this->left[$node->hash])) {
-            unset($this->left[$node->hash]);
-            $this->leftCount--;
-        }
+    public function unsetLeft(string $hash): Node {
+        $this->left->unset($hash);
         return $this;
     }
 
     public function setLeft(Node $leftNode): Node {
-        if(!isset($this->left[$leftNode->hash])) {
-            $this->leftCount++;
-        }
-        $this->left[$leftNode->hash] = $leftNode;
+        $this->left->set($leftNode);
         return $this;
     }
 
     public function getLeft(string $hash): ?Node {
-        return $this->left[$hash] ?? null;
+        return $this->left->get($hash);
     }
 
     public function firstLeft(): ?Node {
-        reset($this->left);
-        return current($this->left) ?: null;
+        return $this->left->first();
     }
 
     public function getLefts(): array {
-        return $this->left;
+        return $this->left->allRef();
     }
 
     public function countLefts() {
-        return $this->leftCount;
+        return $this->left->count();
     }
 
     public function yieldLefts() {
-        foreach($this->left as $left) {
+        $leftRef = &$this->left->allRef();
+        foreach($leftRef as $left) {
             yield $left;
         }
     }
@@ -115,42 +104,39 @@ class Node
     // RIGHT
     //
 
+    public function issetRight(string $hash): bool {
+        return $this->right->isset($hash);
+    }
 
-    public function unsetRight(Node $node): Node {
-        if(isset($this->right[$node->hash])) {
-            unset($this->right[$node->hash]);
-            $this->rightCount--;
-        }
+    public function unsetRight(string $hash): Node {
+        $this->right->unset($hash);
         return $this;
     }
 
     public function setRight(Node $rightNode): Node {
-        if(!isset($this->right[$rightNode->hash])) {
-            $this->rightCount++;
-        }
-        $this->right[$rightNode->hash] = $rightNode;
+        $this->right->set($rightNode);
         return $this;
     }
 
     public function getRight(string $hash): ?Node {
-        return $this->right[$hash] ?? null;
+        return $this->right->get($hash);
     }
 
     public function firstRight(): ?Node {
-        reset($this->right);
-        return current($this->right) ?: null;
+        return $this->right->first();
     }
 
     public function getRights(): array {
-        return $this->right;
+        return $this->right->allRef();
     }
 
     public function countRights() {
-        return $this->rightCount;
+        return $this->right->count();
     }
 
     public function yieldRights() {
-        foreach($this->right as $right) {
+        $rightRef = $this->right->allRef();
+        foreach($rightRef as $right) {
             yield $right;
         }
     }
@@ -163,34 +149,45 @@ class Node
 
     public function delete($strategy = self::DELETE_STRATEGY_MERGE) {
         if($strategy == self::DELETE_STRATEGY_MERGE) {
-            if($this->left) {
-                // assign right to left
-                foreach($this->left as $left) {
-                    foreach($this->right as $right) {
-                        static::chainNodes($left, $right);
-                    }
+            // assign right to left
+            foreach($this->left->allRef() as $left) {
+                foreach($this->right->allRef() as $right) {
+                    static::chainNodes($left, $right);
                 }
             }
         }
 
-        if($this->left) {
-            // unset all lefts
-            foreach ($this->left as $left) {
-                $left->unsetRight($this);
-            }
+        // unset all lefts
+        foreach ($this->left->allRef() as $left) {
+            $left->unsetRight($this->hash);
         }
 
-        if($this->right) {
-            // unset all rights
-            foreach ($this->right as $right) {
-                $right->unsetLeft($this);
-            }
+        // unset all rights
+        foreach ($this->right->allRef() as $right) {
+            $right->unsetLeft($this->hash);
         }
     }
 
     public static function chainNodes(Node $left, Node $right) {
         $left->setRight($right);
         $right->setLeft($left);
+    }
+
+    public function hashTree($ltr = true): string
+    {
+        $string = "Hash: {$this->getHash()} -> \n";
+        $linkedNodesString = '';
+        if($ltr) {
+            foreach($this->right->allRef() as $right) {
+                $linkedNodesString .= "{$right->hashTree($ltr)}\n";
+            }
+        } else {
+            foreach($this->left->allRef() as $left) {
+                $linkedNodesString .= "{$left->hashTree($ltr)}\n";
+            }
+        }
+
+        return $string.'  '.str_replace("\n", "\n  ", $linkedNodesString);
     }
 
 }
