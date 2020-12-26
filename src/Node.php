@@ -41,6 +41,10 @@ class Node
         return $this->hash;
     }
 
+    public function setHash(string $hash) {
+        $this->hash = $hash;
+    }
+
 
     //
     // PAYLOAD
