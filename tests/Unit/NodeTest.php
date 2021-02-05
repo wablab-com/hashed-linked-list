@@ -149,13 +149,49 @@ class NodeTest extends AbstractTestCase
     }
 
 
+    public function testIsSetLeftAndRight() {
+        $ltrRootNode = NodesFactory::createMultipleNodesChain(10);
+        $rtlRootNode = NodesFactory::createMultipleNodesChain(10, false);
+
+        $this->assertTrue($ltrRootNode->issetRight(5));
+        $this->assertFalse($ltrRootNode->issetRight(20));
+
+        $this->assertTrue($rtlRootNode->issetLeft(5));
+        $this->assertFalse($rtlRootNode->issetLeft(20));
+    }
 
 
+    public function testReHash() {
+        $ltrRootNode = NodesFactory::createMultipleNodesChain(10);
+        $ltrRootNode->rehashRight(5,'new-hash');
+
+        $this->assertNull($ltrRootNode->getRight(5));
+        $this->assertEquals('Node Number #5', $ltrRootNode->getRight('new-hash')->getPayload());
+        $this->assertFalse($ltrRootNode->rehashRight('invalid-hash','new-hash'));
 
 
+        $rtlRootNode = NodesFactory::createMultipleNodesChain(10, false);
+        $rtlRootNode->rehashLeft(5,'new-hash');
+
+        $this->assertNull($rtlRootNode->getLeft(5));
+        $this->assertEquals('Node Number #5', $rtlRootNode->getLeft('new-hash')->getPayload());
+        $this->assertFalse($rtlRootNode->rehashLeft('invalid-hash','new-hash'));
+    }
 
 
+    public function testUnsetInvalidHash() {
+        $ltrRootNode = NodesFactory::createMultipleNodesChain(10);
+        $this->assertFalse($ltrRootNode->unsetLeft('invalid-hash'));
+    }
 
+
+    public function testHashTree() {
+        $ltrRootNode = NodesFactory::createMultipleNodesChain(10);
+        $this->assertStringContainsString('Hash: 10 ->', $ltrRootNode->hashTree());
+
+        $rtlRootNode = NodesFactory::createMultipleNodesChain(10, false);
+        $this->assertStringContainsString('Hash: 10 ->', $rtlRootNode->hashTree(false));
+    }
 
 
 

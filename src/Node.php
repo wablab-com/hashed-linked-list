@@ -41,7 +41,11 @@ class Node
         return $this->hash;
     }
 
-    public function setHash(string $hash) {
+    /**
+     * WARNING: don't use this function to rehash the node, you can use rehash function instead
+     * @param string $hash
+     */
+    public function _setHash(string $hash) {
         $this->hash = $hash;
     }
 
@@ -55,9 +59,9 @@ class Node
         return $this->payload;
     }
 
-    public function setPayload($payload): Node {
+    public function setPayload($payload): bool {
         $this->payload = $payload;
-        return $this;
+        return true;
     }
 
 
@@ -70,14 +74,12 @@ class Node
         return $this->left->isset($hash);
     }
 
-    public function unsetLeft(string $hash): Node {
-        $this->left->unset($hash);
-        return $this;
+    public function unsetLeft(string $hash): bool {
+        return $this->left->unset($hash);
     }
 
-    public function setLeft(Node $leftNode): Node {
-        $this->left->set($leftNode);
-        return $this;
+    public function setLeft(Node $leftNode): bool {
+        return $this->left->set($leftNode);
     }
 
     public function getLeft(string $hash): ?Node {
@@ -103,6 +105,10 @@ class Node
         }
     }
 
+    public function rehashLeft($hash, $newHash):bool {
+        return $this->left->rehash($hash, $newHash);
+    }
+
 
     //
     // RIGHT
@@ -112,14 +118,12 @@ class Node
         return $this->right->isset($hash);
     }
 
-    public function unsetRight(string $hash): Node {
-        $this->right->unset($hash);
-        return $this;
+    public function unsetRight(string $hash): bool {
+        return $this->right->unset($hash);
     }
 
-    public function setRight(Node $rightNode): Node {
-        $this->right->set($rightNode);
-        return $this;
+    public function setRight(Node $rightNode): bool {
+        return $this->right->set($rightNode);
     }
 
     public function getRight(string $hash): ?Node {
@@ -143,6 +147,10 @@ class Node
         foreach($rightRef as $right) {
             yield $right;
         }
+    }
+
+    public function rehashRight($hash, $newHash):bool {
+        return $this->right->rehash($hash, $newHash);
     }
 
 
