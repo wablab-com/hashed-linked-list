@@ -16,14 +16,14 @@ class NodeTest extends AbstractTestCase
         $counter = 0;
         do {
             $counter++;
-            $nextNode = $nextNode->firstRight();
+            $nextNode = $nextNode->right()->first();
         } while($nextNode);
         $this->assertEquals(10, $counter);
     }
 
     public function testMultipleNodesChainLeftToRight() {
         $rootNode = NodesFactory::createMultipleNodesChain(10, true);
-        $this->assertEquals(10, $rootNode->countRights());
+        $this->assertEquals(10, $rootNode->right()->count());
     }
 
     public function testHashTreeLeftToRight() {
@@ -32,7 +32,7 @@ class NodeTest extends AbstractTestCase
         $sha1 = sha1(5);
         $iterationNode = $rootNode;
         for($i = 0; $i < 40; $i++) {
-            $iterationNode = $iterationNode->getRight($sha1[$i]);
+            $iterationNode = $iterationNode->right()->get($sha1[$i]);
         }
 
         $this->assertEquals($sha1, $iterationNode->getPayload());
@@ -44,29 +44,29 @@ class NodeTest extends AbstractTestCase
         // now we will delete the middle node
         $current = $firstNode;
         do {
-            $current = $current->firstRight();
+            $current = $current->right()->first();
             if($current->getHash() == 5) {
-                $preNode = $current->firstLeft();
-                $nextNode = $current->firstRight();
+                $preNode = $current->left()->first();
+                $nextNode = $current->right()->first();
 
                 $current->delete();
                 break;
             }
         } while($current);
 
-        $this->assertEquals($preNode->firstRight()->getHash(), $nextNode->getHash());
-        $this->assertEquals($nextNode->firstLeft()->getHash(), $preNode->getHash());
+        $this->assertEquals($preNode->right()->first()->getHash(), $nextNode->getHash());
+        $this->assertEquals($nextNode->left()->first()->getHash(), $preNode->getHash());
     }
 
     public function testGetAllIterationLeftToRight() {
         $rootNode = NodesFactory::createMultipleNodesChain(10, true);
-        $this->assertEquals(10, count($rootNode->getRights()));
+        $this->assertEquals(10, count($rootNode->right()->allRef()));
     }
 
     public function testYieldAllIterationLeftToRight() {
         $rootNode = NodesFactory::createMultipleNodesChain(10, true);
         $counter = 0;
-        foreach($rootNode->yieldRights() as $node) {
+        foreach($rootNode->right()->yieldAll() as $node) {
             $counter++;
         }
         $this->assertEquals(10, $counter);
@@ -84,14 +84,14 @@ class NodeTest extends AbstractTestCase
         $counter = 0;
         do {
             $counter++;
-            $nextNode = $nextNode->firstLeft();
+            $nextNode = $nextNode->left()->first();
         } while($nextNode);
         $this->assertEquals(10, $counter);
     }
 
     public function testMultipleNodesChainRightToLeft() {
         $rootNode = NodesFactory::createMultipleNodesChain(10, false);
-        $this->assertEquals(10, $rootNode->countLefts());
+        $this->assertEquals(10, $rootNode->left()->count());
     }
 
     public function testHashTreeRightToLeft() {
@@ -100,7 +100,7 @@ class NodeTest extends AbstractTestCase
         $sha1 = sha1(5);
         $iterationNode = $rootNode;
         for($i = 0; $i < 40; $i++) {
-            $iterationNode = $iterationNode->getLeft($sha1[$i]);
+            $iterationNode = $iterationNode->left()->get($sha1[$i]);
         }
 
         $this->assertEquals($sha1, $iterationNode->getPayload());
@@ -112,29 +112,29 @@ class NodeTest extends AbstractTestCase
         // now we will delete the middle node
         $current = $firstNode;
         do {
-            $current = $current->firstLeft();
+            $current = $current->left()->first();
             if($current->getHash() == 5) {
-                $preNode = $current->firstRight();
-                $nextNode = $current->firstLeft();
+                $preNode = $current->right()->first();
+                $nextNode = $current->left()->first();
 
                 $current->delete();
                 break;
             }
         } while($current);
 
-        $this->assertEquals($preNode->firstLeft()->getHash(), $nextNode->getHash());
-        $this->assertEquals($nextNode->firstRight()->getHash(), $preNode->getHash());
+        $this->assertEquals($preNode->left()->first()->getHash(), $nextNode->getHash());
+        $this->assertEquals($nextNode->right()->first()->getHash(), $preNode->getHash());
     }
 
     public function testGetAllIterationRightToLeft() {
         $rootNode = NodesFactory::createMultipleNodesChain(10, false);
-        $this->assertEquals(10, count($rootNode->getLefts()));
+        $this->assertEquals(10, count($rootNode->left()->allRef()));
     }
 
     public function testYieldAllIterationRightToLeft() {
         $rootNode = NodesFactory::createMultipleNodesChain(10, false);
         $counter = 0;
-        foreach($rootNode->yieldLefts() as $node) {
+        foreach($rootNode->left()->yieldAll() as $node) {
             $counter++;
         }
         $this->assertEquals(10, $counter);
@@ -153,35 +153,35 @@ class NodeTest extends AbstractTestCase
         $ltrRootNode = NodesFactory::createMultipleNodesChain(10);
         $rtlRootNode = NodesFactory::createMultipleNodesChain(10, false);
 
-        $this->assertTrue($ltrRootNode->issetRight(5));
-        $this->assertFalse($ltrRootNode->issetRight(20));
+        $this->assertTrue($ltrRootNode->right()->isset(5));
+        $this->assertFalse($ltrRootNode->right()->isset(20));
 
-        $this->assertTrue($rtlRootNode->issetLeft(5));
-        $this->assertFalse($rtlRootNode->issetLeft(20));
+        $this->assertTrue($rtlRootNode->left()->isset(5));
+        $this->assertFalse($rtlRootNode->left()->isset(20));
     }
 
 
     public function testReHash() {
         $ltrRootNode = NodesFactory::createMultipleNodesChain(10);
-        $ltrRootNode->rehashRight(5,'new-hash');
+        $ltrRootNode->right()->rehash(5,'new-hash');
 
-        $this->assertNull($ltrRootNode->getRight(5));
-        $this->assertEquals('Node Number #5', $ltrRootNode->getRight('new-hash')->getPayload());
-        $this->assertFalse($ltrRootNode->rehashRight('invalid-hash','new-hash'));
+        $this->assertNull($ltrRootNode->right()->get(5));
+        $this->assertEquals('Node Number #5', $ltrRootNode->right()->get('new-hash')->getPayload());
+        $this->assertFalse($ltrRootNode->right()->rehash('invalid-hash','new-hash'));
 
 
         $rtlRootNode = NodesFactory::createMultipleNodesChain(10, false);
-        $rtlRootNode->rehashLeft(5,'new-hash');
+        $rtlRootNode->left()->rehash(5,'new-hash');
 
-        $this->assertNull($rtlRootNode->getLeft(5));
-        $this->assertEquals('Node Number #5', $rtlRootNode->getLeft('new-hash')->getPayload());
-        $this->assertFalse($rtlRootNode->rehashLeft('invalid-hash','new-hash'));
+        $this->assertNull($rtlRootNode->left()->get(5));
+        $this->assertEquals('Node Number #5', $rtlRootNode->left()->get('new-hash')->getPayload());
+        $this->assertFalse($rtlRootNode->left()->rehash('invalid-hash','new-hash'));
     }
 
 
     public function testUnsetInvalidHash() {
         $ltrRootNode = NodesFactory::createMultipleNodesChain(10);
-        $this->assertFalse($ltrRootNode->unsetLeft('invalid-hash'));
+        $this->assertFalse($ltrRootNode->left()->unset('invalid-hash'));
     }
 
 

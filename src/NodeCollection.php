@@ -66,4 +66,11 @@ class NodeCollection
         return $this->count;
     }
 
+    public function yieldAll()
+    {
+        foreach($this->collection as $node) {
+            yield $node;
+        }
+    }
+
 }

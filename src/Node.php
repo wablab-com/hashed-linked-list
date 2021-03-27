@@ -69,44 +69,9 @@ class Node
     //
     // LEFT
     //
-
-    public function issetLeft(string $hash): bool {
-        return $this->left->isset($hash);
-    }
-
-    public function unsetLeft(string $hash): bool {
-        return $this->left->unset($hash);
-    }
-
-    public function setLeft(Node $leftNode): bool {
-        return $this->left->set($leftNode);
-    }
-
-    public function getLeft(string $hash): ?Node {
-        return $this->left->get($hash);
-    }
-
-    public function firstLeft(): ?Node {
-        return $this->left->first();
-    }
-
-    public function getLefts(): array {
-        return $this->left->allRef();
-    }
-
-    public function countLefts() {
-        return $this->left->count();
-    }
-
-    public function yieldLefts() {
-        $leftRef = &$this->left->allRef();
-        foreach($leftRef as $left) {
-            yield $left;
-        }
-    }
-
-    public function rehashLeft($hash, $newHash):bool {
-        return $this->left->rehash($hash, $newHash);
+    public function left():NodeCollection
+    {
+        return $this->left;
     }
 
 
@@ -114,43 +79,9 @@ class Node
     // RIGHT
     //
 
-    public function issetRight(string $hash): bool {
-        return $this->right->isset($hash);
-    }
-
-    public function unsetRight(string $hash): bool {
-        return $this->right->unset($hash);
-    }
-
-    public function setRight(Node $rightNode): bool {
-        return $this->right->set($rightNode);
-    }
-
-    public function getRight(string $hash): ?Node {
-        return $this->right->get($hash);
-    }
-
-    public function firstRight(): ?Node {
-        return $this->right->first();
-    }
-
-    public function getRights(): array {
-        return $this->right->allRef();
-    }
-
-    public function countRights() {
-        return $this->right->count();
-    }
-
-    public function yieldRights() {
-        $rightRef = $this->right->allRef();
-        foreach($rightRef as $right) {
-            yield $right;
-        }
-    }
-
-    public function rehashRight($hash, $newHash):bool {
-        return $this->right->rehash($hash, $newHash);
+    public function right():NodeCollection
+    {
+        return $this->right;
     }
 
 
@@ -171,18 +102,18 @@ class Node
 
         // unset all lefts
         foreach ($this->left->allRef() as $left) {
-            $left->unsetRight($this->hash);
+            $left->right()->unset($this->hash);
         }
 
         // unset all rights
         foreach ($this->right->allRef() as $right) {
-            $right->unsetLeft($this->hash);
+            $right->left()->unset($this->hash);
         }
     }
 
     public static function chainNodes(Node $left, Node $right) {
-        $left->setRight($right);
-        $right->setLeft($left);
+        $left->right()->set($right);
+        $right->left()->set($left);
     }
 
     public function hashTree($ltr = true): string
