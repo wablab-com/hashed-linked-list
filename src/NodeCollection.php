@@ -21,10 +21,25 @@ class NodeCollection
 
     public function rehash($hash, $newHash): bool {
         if(isset($this->collection[$hash])) {
+            // change node hash
             $node = $this->collection[$hash];
             $node->_setHash($newHash);
+
+            // rehash in the current collection hash directory
             unset($this->collection[$hash]);
             $this->collection[$newHash] = $node;
+
+            // rehash in all left nodes' rights
+            foreach($node->left()->collection as $leftNode) {
+                unset($leftNode->right()->collection[$hash]);
+                $leftNode->right()->collection[$newHash] = $node;
+            }
+
+            // rehash in all right nodes' lefts
+            foreach($node->right()->collection as $rightNode) {
+                unset($rightNode->left()->collection[$hash]);
+                $rightNode->left()->collection[$newHash] = $node;
+            }
 
             return true;
         }
